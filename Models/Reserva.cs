@@ -10,17 +10,24 @@ namespace DesafioProjetoHospedagem.Models
         public Suite Suite { get; set; }
         public int DiasReservados { get; set; }
 
-        public Reserva() { }
-
-        public Reserva(int diasReservados)
+        public Reserva()
         {
-            DiasReservados = diasReservados;
             Hospedes = new List<Pessoa>();
+        }
+
+        public Reserva(int diasReservados) : this()
+        {
+            if (diasReservados <= 0)
+                throw new ArgumentOutOfRangeException(nameof(diasReservados), "A reserva deve ter pelo menos um dia.");
+            DiasReservados = diasReservados;
         }
 
         public void CadastrarHospedes(List<Pessoa> hospedes)
         {
-            // ✅ TODO: Verificar se a capacidade é maior ou igual ao número de hóspedes
+            if (hospedes == null)
+                throw new ArgumentNullException(nameof(hospedes));
+            if (Suite == null)
+                throw new InvalidOperationException("É necessário selecionar uma suíte antes de adicionar hóspedes.");
             if (hospedes.Count <= Suite.Capacidade)
             {
                 Hospedes = hospedes;
@@ -35,6 +42,12 @@ namespace DesafioProjetoHospedagem.Models
 
         public void CadastrarSuite(Suite suite)
         {
+            if (suite == null)
+                throw new ArgumentNullException(nameof(suite));
+            if (suite.Capacidade <= 0 || suite.ValorDiaria < 0)
+                throw new ArgumentException("Capacidade ou valor de diária inválido.", nameof(suite));
+            if (Hospedes.Count > suite.Capacidade)
+                throw new ArgumentException("A suíte não comporta os hóspedes já registados.", nameof(suite));
             Suite = suite;
         }
 
@@ -46,7 +59,10 @@ namespace DesafioProjetoHospedagem.Models
 
         public decimal CalcularValorDiaria()
         {
-            // ✅ TODO: Retorna o valor da diária
+            if (Suite == null)
+                throw new InvalidOperationException("É necessário selecionar uma suíte antes de calcular o preço.");
+            if (DiasReservados <= 0 || Suite.ValorDiaria < 0)
+                throw new InvalidOperationException("A duração e o preço da suíte devem ser válidos.");
             // Cálculo: DiasReservados X Suite.ValorDiaria
             decimal valor = DiasReservados * Suite.ValorDiaria;
 
